@@ -6,3 +6,10 @@ C:\Users\Martin\source\repos\Calculator\Calculator\obj\Debug\Calculator.csproj.S
 C:\Users\Martin\source\repos\Calculator\Calculator\obj\Debug\Calculator.csproj.CoreCompileInputs.cache
 C:\Users\Martin\source\repos\Calculator\Calculator\obj\Debug\Calculator.exe
 C:\Users\Martin\source\repos\Calculator\Calculator\obj\Debug\Calculator.pdb
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\bin\Debug\Calculator.exe.config
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\bin\Debug\Calculator.exe
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\bin\Debug\Calculator.pdb
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\obj\Debug\Calculator.csproj.AssemblyReference.cache
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\obj\Debug\Calculator.csproj.CoreCompileInputs.cache
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\obj\Debug\Calculator.exe
+U:\PRG_oktava\Seminar_repo\Calculator\Calculator\obj\Debug\Calculator.pdb
