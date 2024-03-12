@@ -25,7 +25,7 @@ namespace MS_Pain
         List<Tuple<Shape, bool>> rectangles = new List<Tuple<Shape, bool>>(); //2
         List<Tuple<Shape, bool>> ellipses = new List<Tuple<Shape, bool>>();   //3
         List <Tuple<Shape, string>> texts = new List<Tuple<Shape, string>>();   //4
-        List<Shape> airbrushes = new List<Shape>(); //5
+        List <Tuple<Shape, Image>> images = new List<Tuple<Shape, Image>>();   //5
 
         List<Point> tempLine;   //1,6       nedokončená linka
         Point tempGeometry; //2,3,4,5       počáteční bod nedokončeného tvaru
@@ -70,28 +70,20 @@ namespace MS_Pain
                 textSize = (float)(0.65 * Math.Abs(pt1.Y - pt2.Y));   // velikost textu odvozená od velikosti hranice
                 g.DrawString(text.Item2, new Font("arial", textSize), new SolidBrush(text.Item1.color), (RectangleF)Rectangler(pt1, pt2));
             }
+            foreach (Tuple<Shape, Image> image in images)    //4
+            {
+                Point pt1 = image.Item1.line[0];
+                Point pt2 = image.Item1.line[1];
+                g.DrawImage(image.Item2, Rectangler(pt1, pt2));
+            }
 
             //zobrazí náhled objektu během kreslení
             if (isActive && (toolIndex == 1 || toolIndex == 6)) 
                 g.DrawLines(new Pen(colorDialog1.Color, size), tempLine.ToArray());
-            if (isActive && (toolIndex == 2 || toolIndex == 4)) 
+            if (isActive && (toolIndex == 2 || toolIndex == 4 || toolIndex == 5)) 
                 g.DrawRectangle(new Pen(colorDialog1.Color, size), Rectangler(tempLine[0], tempGeometry));
             if (isActive && toolIndex == 3)
                 g.DrawEllipse(new Pen(colorDialog1.Color, size), Rectangler(tempLine[0], tempGeometry));
-            if (isActive && toolIndex == 5)
-            {
-                /*Rectangle[] rectangles = new Rectangle[tempLine.Count -1];
-                for (int i = 0; i < tempLine.Count - 1; i++)
-                {
-                    rectangles[i] = Rectangler(tempLine[i], tempLine[i + 1]);
-                }*/
-                List<Rectangle> rectangles = new List<Rectangle>();
-                foreach (var item in tempLine)
-                {
-                    rectangles.Add(new Rectangle(item.X, item.Y, 1, 1));
-                }
-                g.FillRectangles(new SolidBrush(colorDialog1.Color), rectangles.ToArray());
-            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -112,9 +104,8 @@ namespace MS_Pain
                     
                 case 4: //text
 
-                case 5: //airbrush
+                case 5: //obrázek
                     tempLine = new List<Point> { e.Location };
-                    timer1.Enabled = true;
                     break;
                 case 6: //guma
                     tempColor = colorDialog1.Color;
@@ -138,7 +129,7 @@ namespace MS_Pain
                 tempLine.Add(e.Location);
                 panelPaint.Refresh();
             }
-            if(isActive && (toolIndex == 2 || toolIndex == 3 || toolIndex == 4))
+            if(isActive && (toolIndex == 2 || toolIndex == 3 || toolIndex == 4 || toolIndex == 5))
             {
                 tempGeometry = e.Location;
                 panelPaint.Refresh();
@@ -190,9 +181,9 @@ namespace MS_Pain
 
             if(isActive && toolIndex == 5)
             {
-                timer1.Enabled = false;
                 tempLine.Add(e.Location);
-                airbrushes.Add(new Shape(tempLine, size, colorDialog1.Color));
+                openFileDialog1.ShowDialog();
+                images.Add(new Tuple<Shape, Image>(new Shape(tempLine, size, colorDialog1.Color), Image.FromFile(openFileDialog1.FileName))); //todo fix
                 isActive = false;
                 panelPaint.Refresh();
             }
@@ -211,7 +202,7 @@ namespace MS_Pain
             rectangles.Clear();
             ellipses.Clear();
             texts.Clear();
-            airbrushes.Clear();
+            images.Clear();
             tempGeometry = Point.Empty;
             panelPaint.Refresh();
         }
@@ -239,22 +230,12 @@ namespace MS_Pain
             }
         }
 
-        private void buttonImage_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private Rectangle Rectangler(Point pt1, Point pt2)  //protože c# evidentně neumí udělat tohle automaticky
         {
             return new Rectangle(Math.Min(pt1.X, pt2.X), 
                                  Math.Min(pt1.Y, pt2.Y),
                                  Math.Abs(pt1.X - pt2.X), 
                                  Math.Abs(pt1.Y - pt2.Y));
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            tempLine.Add(panelPaint.PointToClient(MousePosition));
         }
     }
 }
