@@ -35,5 +35,29 @@ namespace MS_Pain
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
+
+        private void Popup_Load(object sender, EventArgs e) //QOL
+        {
+            if (textBox1.Visible)
+                textBox1.Select();
+            else
+                numericUpDown1.Select();
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)  //QOL
+        {
+            if (e.KeyChar == (char)13)
+            {
+                button1.PerformClick();
+            }
+        }
+
+        private void numericUpDown1_KeyPress(object sender, KeyPressEventArgs e)    //QOL
+        {
+            if (e.KeyChar == (char)13)
+            {
+                button1.PerformClick();
+            }
+        }
     }
 }

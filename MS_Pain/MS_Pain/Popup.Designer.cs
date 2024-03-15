@@ -51,6 +51,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(219, 22);
             this.textBox1.TabIndex = 1;
+            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // numericUpDown1
             // 
@@ -73,6 +74,7 @@
             0,
             0,
             0});
+            this.numericUpDown1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.numericUpDown1_KeyPress);
             // 
             // Popup
             // 
@@ -84,6 +86,7 @@
             this.Controls.Add(this.button1);
             this.Name = "Popup";
             this.Text = "Popup";
+            this.Load += new System.EventHandler(this.Popup_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

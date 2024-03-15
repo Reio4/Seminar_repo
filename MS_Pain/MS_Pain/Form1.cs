@@ -14,14 +14,14 @@ namespace MS_Pain
     {
         bool isActive = false;
         bool isFilled = false;
-        static float size = 3;  //počáteční velikost
+        static float size = 3;  // počáteční velikost
         float textSize = 0;
 
-        int toolIndex;  //od 1 do 6
+        int toolIndex;  // od 1 do 6
 
-        List<Tuple<int, int>> order = new List<Tuple<int, int>>();  // bude se hodit
+        List<Tuple<int, int>> order = new List<Tuple<int, int>>();  // 1. index listu (1-5), 2. pořadí v daném listu
 
-        List<Shape> lines = new List<Shape>();      //1,6
+        List<Shape> lines = new List<Shape>();      //1 (6)
         List<Tuple<Shape, bool>> rectangles = new List<Tuple<Shape, bool>>(); //2
         List<Tuple<Shape, bool>> ellipses = new List<Tuple<Shape, bool>>();   //3
         List <Tuple<Shape, string>> texts = new List<Tuple<Shape, string>>();   //4
@@ -30,10 +30,10 @@ namespace MS_Pain
         List<Point> tempLine;   //1,6       nedokončená linka
         Point tempGeometry; //2,3,4,5       počáteční bod nedokončeného tvaru
         
-        Color tempColor; //ukládá barvu během mazání gumou
+        Color tempColor; // ukládá barvu během mazání gumou
 
-        Form popupSize = new Popup(size);   //menu pro výběr velikosti
-        Form popupText = new Popup();       //menu pro zadávání textu pro nástroj text
+        Form popupSize = new Popup(size);   // menu pro výběr velikosti
+        Form popupText = new Popup();       // menu pro zadávání textu pro nástroj text
        
         public Form1()
         {
@@ -44,85 +44,97 @@ namespace MS_Pain
         {
             Graphics g = e.Graphics;
 
-            foreach (Shape item in lines)   //1, 6
-                g.DrawLines(new Pen(item.color, item.size), item.line.ToArray());
+            foreach (Tuple<int, int> shape in order)    // vykresluje objekty podle pořadí ve kterém byly přidány
+            {
+                int i = shape.Item2;    // pro zjednodušení
+                switch (shape.Item1)
+                {
+                    case 1: // tužka a guma
+                        g.DrawLines(new Pen(lines[i].color, lines[i].size), lines[i].line.ToArray());
+                        break;
 
-            foreach (Tuple<Shape, bool> rectangle in rectangles)    //2
-            {
-                Point pt1 = rectangle.Item1.line[0];
-                Point pt2 = rectangle.Item1.line[1];
-                g.DrawRectangle(new Pen(rectangle.Item1.color, rectangle.Item1.size), Rectangler(pt1, pt2)); 
-                if (rectangle.Item2)    //není v if/else, protože to takhle vypadá lépe
-                    g.FillRectangle(new SolidBrush(rectangle.Item1.color), Rectangler(pt1, pt2));
-            }
-            foreach (Tuple<Shape, bool> ellipse in ellipses)    //3
-            {
-                Point pt1 = ellipse.Item1.line[0];
-                Point pt2 = ellipse.Item1.line[1];
-                g.DrawEllipse(new Pen(ellipse.Item1.color, ellipse.Item1.size), Rectangler(pt1, pt2));
-                if (ellipse.Item2)  //není v if/else, protože to takhle vypadá lépe
-                    g.FillEllipse(new SolidBrush(ellipse.Item1.color), Rectangler(pt1, pt2));
-            }
-            foreach (Tuple<Shape, string> text in texts)    //4
-            {
-                Point pt1 = text.Item1.line[0];
-                Point pt2 = text.Item1.line[1];
-                textSize = (float)(0.65 * Math.Abs(pt1.Y - pt2.Y));   // velikost textu odvozená od velikosti hranice
-                g.DrawString(text.Item2, new Font("arial", textSize), new SolidBrush(text.Item1.color), (RectangleF)Rectangler(pt1, pt2));
-            }
-            foreach (Tuple<Shape, Image> image in images)    //4
-            {
-                Point pt1 = image.Item1.line[0];
-                Point pt2 = image.Item1.line[1];
-                g.DrawImage(image.Item2, Rectangler(pt1, pt2));
+                    case 2: // obdélník
+                        Point pt1 = rectangles[i].Item1.line[0];
+                        Point pt2 = rectangles[i].Item1.line[1];
+                        g.DrawRectangle(new Pen(rectangles[i].Item1.color, rectangles[i].Item1.size), Rectangler(pt1, pt2));
+                        if (rectangles[i].Item2)  
+                            g.FillRectangle(new SolidBrush(rectangles[i].Item1.color), Rectangler(pt1, pt2));
+                        break;
+
+                    case 3: // elipsa
+                        Point pt1_ = ellipses[i].Item1.line[0];
+                        Point pt2_ = ellipses[i].Item1.line[1];
+                        g.DrawEllipse(new Pen(ellipses[i].Item1.color, ellipses[i].Item1.size), Rectangler(pt1_, pt2_));
+                        if (ellipses[i].Item2) 
+                            g.FillEllipse(new SolidBrush(ellipses[i].Item1.color), Rectangler(pt1_, pt2_));
+                        break;
+
+                    case 4: // text
+                        Point pt1__ = texts[i].Item1.line[0];
+                        Point pt2__ = texts[i].Item1.line[1];
+                        textSize = (float)(0.65 * Math.Abs(pt1__.Y - pt2__.Y));   // velikost textu je odvozená od velikosti obdélníku
+                        g.DrawString(texts[i].Item2, new Font("arial", textSize), new SolidBrush(texts[i].Item1.color), (RectangleF)Rectangler(pt1__, pt2__));
+                        break;
+
+                    case 5: // obrázek
+                        Point pt1___ = images[i].Item1.line[0];
+                        Point pt2___ = images[i].Item1.line[1];
+                        g.DrawImage(images[i].Item2, Rectangler(pt1___, pt2___));
+                        break;
+                }
             }
 
-            //zobrazí náhled objektu během kreslení
-            if (isActive && (toolIndex == 1 || toolIndex == 6)) 
-                g.DrawLines(new Pen(colorDialog1.Color, size), tempLine.ToArray());
-            if (isActive && (toolIndex == 2 || toolIndex == 4 || toolIndex == 5)) 
-                g.DrawRectangle(new Pen(colorDialog1.Color, size), Rectangler(tempLine[0], tempGeometry));
-            if (isActive && toolIndex == 3)
-                g.DrawEllipse(new Pen(colorDialog1.Color, size), Rectangler(tempLine[0], tempGeometry));
+            //  zobrazí náhled objektu během kreslení
+            if (isActive)
+            {
+                if (toolIndex == 1 || toolIndex == 6) 
+                    g.DrawLines(new Pen(colorDialog1.Color, size), tempLine.ToArray());
+                if (toolIndex == 2 || toolIndex == 4 || toolIndex == 5) 
+                    g.DrawRectangle(new Pen(colorDialog1.Color, size), Rectangler(tempLine[0], tempGeometry));
+                if (toolIndex == 3)
+                    g.DrawEllipse(new Pen(colorDialog1.Color, size), Rectangler(tempLine[0], tempGeometry));
+            }
+
+            //  zamkne/odemkne mazací tlačítka
+            if (!order.Any())
+            {
+                buttonBack.Enabled = false;
+                buttonClear.Enabled = false;
+            }
+            else
+            {
+                buttonClear.Enabled = true;
+                buttonBack.Enabled = true;
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            radioButtonEraser.PerformClick();
+            radioButtonPen.PerformClick();  // jinak nefunguje tužka při prvním načtení, nenašel jsem důvod
         }
 
         private void panelPaint_MouseDown(object sender, MouseEventArgs e)
         {
             isActive = true;
-            switch(toolIndex)
+            if(toolIndex >= 1 || toolIndex <= 5)
             {
-                case 1: //tužka
-
-                case 2: //obdélník
-
-                case 3: //elipsa
-                    
-                case 4: //text
-
-                case 5: //obrázek
-                    tempLine = new List<Point> { e.Location };
-                    break;
-                case 6: //guma
-                    tempColor = colorDialog1.Color;
-                    colorDialog1.Color = Color.White;
-
-                    tempLine = new List<Point> { e.Location };
-                    toolStripStatusLabel1.Text = "zapsání prvního bodu";
-                    break;
+                tempLine = new List<Point> { e.Location };
+            }
+            if(toolIndex == 6)
+            {
+                tempColor = colorDialog1.Color;
+                colorDialog1.Color = Color.White;
+                tempLine = new List<Point> { e.Location };
             }
         }
 
-        private void Radio_Switch(object sender, EventArgs e)
+        private void Radio_Switch(object sender, EventArgs e)   // všechna tlačítka pro nástroje vedou sem
         {
             toolIndex = ((RadioButton)sender).TabIndex;
         }
 
-        private void panelPaint_MouseMove(object sender, MouseEventArgs e)
+        private void panelPaint_MouseMove(object sender, MouseEventArgs e)  // ukládá dosavadní čáru anebo poslední bod pro vykreslení
         {
             if (isActive && (toolIndex == 1 || toolIndex == 6)) 
             {
@@ -138,58 +150,65 @@ namespace MS_Pain
 
         private void panelPaint_MouseUp(object sender, MouseEventArgs e)    //vytvoří se objekt, nástroj se deaktivuje
         {
-            if (isActive && (toolIndex == 1 || toolIndex == 6))
+            if (isActive)
             {
-                lines.Add(new Shape(tempLine, size, colorDialog1.Color));
-
-
-                panelPaint.Refresh();
-                if (toolIndex == 6) 
-                    colorDialog1.Color = tempColor;
-                isActive = false;
-            }
-            
-            if(isActive && toolIndex == 2)
-            {
-                tempLine.Add(e.Location);
-                rectangles.Add(new Tuple<Shape, bool>(new Shape(tempLine, size, colorDialog1.Color), isFilled));
-                panelPaint.Refresh();
-                isActive = false;
-            }
-            
-            if (isActive && toolIndex == 3)
-            {
-                tempLine.Add(e.Location);
-                ellipses.Add(new Tuple<Shape, bool>(new Shape(tempLine, size, colorDialog1.Color), isFilled));
-                isActive = false;
-                panelPaint.Refresh();
-            }
-
-            if (isActive && toolIndex == 4)
-            {
-                tempLine.Add(e.Location);
-                string text_ = "";
-                using (Popup popup = new Popup())
+                if (toolIndex == 1 || toolIndex == 6)
                 {
-                    if (popup.ShowDialog() == DialogResult.OK)
-                        text_ = popup.returnText;
-                }
-                texts.Add(new Tuple<Shape, string>(new Shape(tempLine, size, colorDialog1.Color), text_));
-                isActive = false;
-                panelPaint.Refresh();
-            }
+                    order.Add(new Tuple<int, int>(1, lines.Count));
+                    lines.Add(new Shape(tempLine, size, colorDialog1.Color));
 
-            if(isActive && toolIndex == 5)
-            {
-                tempLine.Add(e.Location);
-                openFileDialog1.ShowDialog();
-                images.Add(new Tuple<Shape, Image>(new Shape(tempLine, size, colorDialog1.Color), Image.FromFile(openFileDialog1.FileName))); //todo fix
-                isActive = false;
-                panelPaint.Refresh();
+                    panelPaint.Refresh();
+                    if (toolIndex == 6)
+                        colorDialog1.Color = tempColor;
+                    isActive = false;
+                }
+
+                if (toolIndex == 2)
+                {
+                    tempLine.Add(e.Location);
+                    order.Add(new Tuple<int, int>(2, rectangles.Count));
+                    rectangles.Add(new Tuple<Shape, bool>(new Shape(tempLine, size, colorDialog1.Color), isFilled));
+                    isActive = false;
+                    panelPaint.Refresh();
+                }
+
+                if (toolIndex == 3)
+                {
+                    tempLine.Add(e.Location);
+                    order.Add(new Tuple<int, int>(3, ellipses.Count));
+                    ellipses.Add(new Tuple<Shape, bool>(new Shape(tempLine, size, colorDialog1.Color), isFilled));
+                    isActive = false;
+                    panelPaint.Refresh();
+                }
+
+                if (toolIndex == 4)
+                {
+                    tempLine.Add(e.Location);
+                    string text_ = "";
+                    using (Popup popup = new Popup())
+                    {
+                        if (popup.ShowDialog() == DialogResult.OK)
+                            text_ = popup.returnText;
+                    }
+                    order.Add(new Tuple<int, int>(4, texts.Count));
+                    texts.Add(new Tuple<Shape, string>(new Shape(tempLine, size, colorDialog1.Color), text_));
+                    isActive = false;
+                    panelPaint.Refresh();
+                }
+
+                if (toolIndex == 5)
+                {
+                    tempLine.Add(e.Location);
+                    openFileDialog1.ShowDialog();
+                    order.Add(new Tuple<int, int>(5, images.Count));
+                    images.Add(new Tuple<Shape, Image>(new Shape(tempLine, size, colorDialog1.Color), Image.FromFile(openFileDialog1.FileName))); //todo fix
+                    isActive = false;
+                    panelPaint.Refresh();
+                }
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonPalette_Click(object sender, EventArgs e)
         {
             colorDialog1.ShowDialog();
         }
@@ -197,13 +216,17 @@ namespace MS_Pain
         private void ButtonClear_Click(object sender, EventArgs e)
         {
             isActive = false;
-            lines.Clear();
+            order.Clear();
+
             tempLine.Clear();
+            tempGeometry = Point.Empty;
+
+            lines.Clear();
             rectangles.Clear();
             ellipses.Clear();
             texts.Clear();
             images.Clear();
-            tempGeometry = Point.Empty;
+
             panelPaint.Refresh();
         }
 
@@ -236,6 +259,31 @@ namespace MS_Pain
                                  Math.Min(pt1.Y, pt2.Y),
                                  Math.Abs(pt1.X - pt2.X), 
                                  Math.Abs(pt1.Y - pt2.Y));
+        }
+
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            Tuple<int, int> back = order.LastOrDefault();
+            switch (back.Item1)
+            {
+                case 1:
+                    lines.RemoveAt(back.Item2);
+                    break;
+                case 2:
+                    rectangles.RemoveAt(back.Item2);
+                    break;
+                case 3:
+                    ellipses.RemoveAt(back.Item2);
+                    break;
+                case 4:
+                    texts.RemoveAt(back.Item2);
+                    break;
+                case 5:
+                    images.RemoveAt(back.Item2);
+                    break;
+            }
+            order.RemoveAt(order.Count - 1);
+            panelPaint.Refresh();
         }
     }
 }
